@@ -12,7 +12,7 @@ def dot_product(vector1, vector2):
     """
     out = None
     ### YOUR CODE HERE
-    pass
+    out=np.dot(vector1,vector2)
     ### END YOUR CODE
 
     return out
@@ -48,7 +48,7 @@ def svd(matrix):
     s = None
     v = None
     ### YOUR CODE HERE
-    pass
+    (u,s,v)=np.linalg.svd(matrix)
     ### END YOUR CODE
 
     return u, s, v
@@ -65,7 +65,7 @@ def get_singular_values(matrix, n):
     singular_values = None
     u, s, v = svd(matrix)
     ### YOUR CODE HERE
-    pass
+    singular_values=s[0:n]
     ### END YOUR CODE
     return singular_values
 
@@ -80,7 +80,7 @@ def eigen_decomp(matrix):
     w = None
     v = None
     ### YOUR CODE HERE
-    pass
+    w,v=np.linalg.eig(matrix)
     ### END YOUR CODE
     return w, v
 
@@ -94,10 +94,24 @@ def get_eigen_values_and_vectors(matrix, num_values):
         eigen_values: array of shape (n)
         eigen_vectors: array of shape (m, n)
     """
-    w, v = eigen_decomp(matrix)
+    (w, v) = eigen_decomp(matrix)
     eigen_values = []
     eigen_vectors = []
     ### YOUR CODE HERE
-    pass
+    max_indexs=np.argpartition(w, -num_values)
+    max_indexs=max_indexs[-num_values:]
+    ids=np.argsort(w[max_indexs])
+    sort_index=max_indexs[ids]
+    eigen_values=w[sort_index]
+    eigen_vectors=v[:,sort_index]
     ### END YOUR CODE
     return eigen_values, eigen_vectors
+
+import imageManip
+if __name__=="__main__":
+    image1_path = './image1.jpg'
+    image2_path = './image2.jpg'
+    image1 = imageManip.load(image1_path)
+    image2 = imageManip.load(image2_path)
+    image_mixed = imageManip.mix_images(image1, image2, channel1='R', channel2='G')
+    imageManip.display(image_mixed)

@@ -18,11 +18,16 @@ def load(image_path):
 
     ### YOUR CODE HERE
     # Use skimage io.imread
-    pass
+    out=io.imread(image_path)
     ### END YOUR CODE
 
     return out
 
+def display(img):
+    # Show image
+    plt.imshow(img)
+    plt.axis('off')
+    plt.show()
 
 def change_value(image):
     """ Change the value of every pixel by following x_n = 0.5*x_p^2 
@@ -38,7 +43,7 @@ def change_value(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out=0.5*np.power(image,2)
     ### END YOUR CODE
 
     return out
@@ -56,7 +61,7 @@ def convert_to_grey_scale(image):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out=color.rgb2gray(image)
     ### END YOUR CODE
 
     return out
@@ -75,9 +80,14 @@ def rgb_decomposition(image, channel):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out=image.copy()
+    if(channel.upper()=='R'):
+        out[:,:,0]=0
+    elif (channel.upper()=='G'):
+        out[:,:,1]=0
+    elif (channel.upper()=='B'):
+        out[:,:,2]=0
     ### END YOUR CODE
-
     return out
 
 def lab_decomposition(image, channel):
@@ -95,7 +105,12 @@ def lab_decomposition(image, channel):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    if(channel.upper()=='L'):
+        out=lab[:,:,0]
+    elif(channel.upper()=='A'):
+        out=lab[:,:,1]
+    elif(channel.upper()=='B'):
+        out=lab[:,:,2]
     ### END YOUR CODE
 
     return out
@@ -115,7 +130,12 @@ def hsv_decomposition(image, channel='H'):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    if(channel.upper()=='H'):
+        out=hsv[:,:,0]
+    elif(channel.upper()=='S'):
+        out=hsv[:,:,1]
+    elif(channel.upper()=='V'):
+        out=hsv[:,:,2]
     ### END YOUR CODE
 
     return out
@@ -136,7 +156,7 @@ def mix_images(image1, image2, channel1, channel2):
 
     out = None
     ### YOUR CODE HERE
-    pass
+    out=image1.copy()
+    out[:,int(image1.shape[0]/2):,:]=image2[:,int(image1.shape[0]/2):,:]
     ### END YOUR CODE
-
     return out

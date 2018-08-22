@@ -27,7 +27,10 @@ def conv(image, kernel):
     padded = np.pad(image, pad_width, mode='edge')
 
     ### YOUR CODE HERE
-    pass
+    for i in range(Hi):
+        for j in range(Wi):
+            weight=padded[i:i+Hk,j:j+Wk]*kernel
+            out[i,j]=np.sum(weight)
     ### END YOUR CODE
 
     return out
@@ -50,11 +53,11 @@ def gaussian_kernel(size, sigma):
     """  
     
     kernel = np.zeros((size, size))
-
     ### YOUR CODE HERE
-    pass
+    for i in range(size):
+        for j in range(size):
+            kernel[i,j]=1/(2*np.pi*(sigma**2))*np.exp(-((i-size//2)**2+(j-size//2)**2)/(2*(sigma**2)))
     ### END YOUR CODE
-
     return kernel
 
 def partial_x(img):
@@ -72,7 +75,7 @@ def partial_x(img):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out=conv(img,np.array([[-0.5,0,0.5]]))
     ### END YOUR CODE
 
     return out
@@ -92,7 +95,7 @@ def partial_y(img):
     out = None
 
     ### YOUR CODE HERE
-    pass
+    out=conv(img,np.array([[-0.5],[0],[0.5]]))
     ### END YOUR CODE
 
     return out
@@ -113,7 +116,11 @@ def gradient(img):
     theta = np.zeros(img.shape)
 
     ### YOUR CODE HERE
-    pass
+    Gx = partial_x(img)
+    Gy = partial_y(img)
+    G=np.sqrt(np.power(Gx,2)+np.power(Gy,2))
+    theta=(np.arctan2(Gy,Gx) + 2 * np.pi) % (2 * np.pi)
+    theta=theta*180/np.pi
     ### END YOUR CODE
 
     return G, theta
@@ -139,10 +146,32 @@ def non_maximum_suppression(G, theta):
     theta = np.floor((theta + 22.5) / 45) * 45
 
     ### BEGIN YOUR CODE
-    pass
+    for i in range(H):
+        for j in range(W):
+            grad=G[i,j]
+            if grad ==0:
+                continue
+            else:
+                if theta[i,j] ==0 or theta[i,j]==180:
+                    if grad>=safe_index(G,i,j-1) and grad>=safe_index(G,i,j+1):
+                        out[i,j]=G[i,j]
+                elif theta[i,j] ==45 or theta[i,j]==225:
+                    if grad>=safe_index(G,i+1,(j+1)) and grad>=safe_index(G,(i-1),j-1):
+                        out[i,j]=G[i,j]
+                elif theta[i,j] == 90 or theta[i,j]==270:
+                    if grad>=safe_index(G,i-1,j) and grad >=safe_index(G,(i+1),j):
+                        out[i,j]=G[i,j]
+                elif theta[i,j] == 135 or theta[i,j] ==315:
+                    if grad>=safe_index(G,i-1,j+1) and grad>=safe_index(G,(i+1),(j-1)):
+                        out[i,j]=G[i,j]
     ### END YOUR CODE
 
     return out
+
+def safe_index(G,i,j):
+    if i>=0 and i<G.shape[0] and j>=0 and j<G.shape[1]:
+        return G[i,j]
+    return 0
 
 def double_thresholding(img, high, low):
     """
@@ -164,7 +193,8 @@ def double_thresholding(img, high, low):
     weak_edges = np.zeros(img.shape)
 
     ### YOUR CODE HERE
-    pass
+    strong_edges=img>=high
+    weak_edges=np.logical_and(img>=low,img<high)
     ### END YOUR CODE
 
     return strong_edges, weak_edges
@@ -215,9 +245,18 @@ def link_edges(strong_edges, weak_edges):
     H, W = strong_edges.shape
     indices = np.stack(np.nonzero(strong_edges)).T
     edges = np.zeros((H, W))
-
+    tmp_weak=np.copy(weak_edges)
     ### YOUR CODE HERE
-    pass
+    while indices.size !=0:
+        id=indices[0]
+        edges[id[0],id[1]]=1
+        neighbors=get_neighbors(id[0],id[1],H,W)
+        for point in neighbors:
+            if tmp_weak[point[0],point[1]]!=0:
+                indices=np.vstack((indices,point))
+                tmp_weak[point[0], point[1]]=0
+        indices=np.delete(indices,0,0)
+
     ### END YOUR CODE
 
     return edges
@@ -235,7 +274,13 @@ def canny(img, kernel_size=5, sigma=1.4, high=20, low=15):
         edge: numpy array of shape(H, W)
     """
     ### YOUR CODE HERE
-    pass
+    kernel=gaussian_kernel(kernel_size,sigma)
+    kernel=kernel/np.sum(kernel)
+    smooth_image=conv(img,kernel)
+    (G,theta)=gradient(smooth_image)
+    G=non_maximum_suppression(G,theta)
+    strong_edges,weak_edges=double_thresholding(G,high,low)
+    edge=link_edges(strong_edges,weak_edges)
     ### END YOUR CODE
 
     return edge

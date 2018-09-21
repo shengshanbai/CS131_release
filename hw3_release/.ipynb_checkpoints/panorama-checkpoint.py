@@ -66,7 +66,11 @@ def simple_descriptor(patch):
     """
     feature = []
     ### YOUR CODE HERE
-    pass
+    std=np.std(patch)
+    if std == 0:
+        std=1
+    mean=np.mean(patch)
+    feature=((patch-mean)/std).flatten()
     ### END YOUR CODE
     return feature
 
@@ -116,7 +120,13 @@ def match_descriptors(desc1, desc2, threshold=0.5):
     dists = cdist(desc1, desc2)
 
     ### YOUR CODE HERE
-    pass
+    sortIndex=dists.argsort(axis=1)
+    for i in range(sortIndex.shape[0]):
+        smallest=dists[i,sortIndex[i,0]]
+        small=dists[i,sortIndex[i,1]]
+        if smallest/small<threshold :
+            matches.append([i,sortIndex[i,0]])
+    matches=np.array(matches)
     ### END YOUR CODE
     
     return matches
@@ -140,9 +150,8 @@ def fit_affine_matrix(p1, p2):
         'Different number of points in p1 and p2'
     p1 = pad(p1)
     p2 = pad(p2)
-
     ### YOUR CODE HERE
-    pass
+    H, _, _, _ = np.linalg.lstsq(p2,p1)
     ### END YOUR CODE
 
     # Sometimes numerical issues cause least-squares to produce the last
